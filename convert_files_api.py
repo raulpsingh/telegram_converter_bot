@@ -4,6 +4,8 @@ import os
 
 convertapi.api_secret = config.CONVERT_TOKEN
 
+converted = None
+
 
 class ConvertFilesApi:
     file_name = None
@@ -17,12 +19,11 @@ class ConvertFilesApi:
         self.convert_to = convert_to
 
     def convert(self):
+        global converted
         file_name = self.file_name
-        from_format = 'docx' if file_name.endswith('.docx') else 'pdf'
-        if self.convert_to == "pdf":
-            converted = self.file_name + '-converted.pdf'
-        elif self.convert_to == "docx":
-            converted = self.file_name + '-converted.docx'
+        from_form = file_name.split('.')
+        from_format = from_form[1]
+        converted = self.file_name + f'-converted.{self.convert_to}'
         convertapi.convert(f'{self.convert_to}', {'File': f'./files_to_convert/{file_name}'},
                            from_format=from_format).save_files(
             f'./converted_files/{converted}')
