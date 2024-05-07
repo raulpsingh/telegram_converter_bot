@@ -25,7 +25,6 @@ class ConvertFilesApi:
         from_format = from_form[1]
         converted = self.file_name + f'-converted.{self.convert_to}'
         convertapi.convert(f'{self.convert_to}', {'File': f'./files_to_convert/{file_name}'},
-                           from_format=from_format).save_files(
-            f'./converted_files/{converted}')
+                           from_format=from_format).save_files(f'./converted_files/{converted}')
         os.remove(f'./files_to_convert/{file_name}')
         return converted

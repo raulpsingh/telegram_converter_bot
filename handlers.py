@@ -1,7 +1,6 @@
 import os
 from aiogram import types, F, Router
 from aiogram.filters import CommandStart
-from aiogram.filters.callback_data import CallbackData
 
 import convert_files_api
 import keyboards
@@ -9,18 +8,13 @@ import keyboards
 router = Router()
 
 
-class MyCallback(CallbackData, prefix="my"):
-    document_id: int
-    action: str
-    file_name: str
-
-
 @router.message(CommandStart())
 async def start(message: types.Message):
     await message.answer("Hello, this is a friendly bot "
                          "that will help you to convert your files and currencies. You can select "
                          "below what type "
-                         "of conversion do you want", reply_markup=keyboards.start_kb)
+                         "of conversion do you want", reply_markup=await keyboards.inline_keyboard(message.chat.id,
+                                                                                                   'start'))
 
 
 @router.callback_query(F.data == 'convert_files')

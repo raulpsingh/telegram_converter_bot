@@ -9,6 +9,7 @@ dp = Dispatcher()
 
 
 async def main():
+    print("Bot is running...")
     dp.include_routers(router_callbacks, router_choice)
     await dp.start_polling(bot)
 

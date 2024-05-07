@@ -1,5 +1,3 @@
-import random
-
 from aiogram import Router, F, types
 from aiogram.types import CallbackQuery
 
@@ -13,7 +11,7 @@ test_dict = {}
 
 @router.message(F.document)
 async def convert_choice(message: types.Message):
-    key = random.randint(1, 1000)
+    key = message.chat.id
     global test_dict
     test_dict[key] = [message.document.file_id, message.document.file_name]
     if message.document.file_name.endswith(".docx"):
