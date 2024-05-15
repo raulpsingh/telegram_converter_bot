@@ -1,6 +1,8 @@
 import os
 from aiogram import types, F, Router
 from aiogram.filters import CommandStart
+from aiogram.fsm.state import StatesGroup, State
+from aiogram.fsm.context import FSMContext
 
 import convert_files_api
 import keyboards
@@ -8,8 +10,16 @@ import keyboards
 router = Router()
 
 
+class FileWaiter(StatesGroup):
+    waiting_for_click = State()
+    waiting_for_file = State()
+    waiting_for_sum = State()
+    convert_to = State()
+
+
 @router.message(CommandStart())
-async def start(message: types.Message):
+async def start(message: types.Message, state: FSMContext):
+    await state.set_state(FileWaiter.waiting_for_click)
     await message.answer("Hello, this is a friendly bot "
                          "that will help you to convert your files and currencies. You can select "
                          "below what type "
@@ -18,16 +28,34 @@ async def start(message: types.Message):
 
 
 @router.callback_query(F.data == 'convert_files')
-async def convert_files(call: types.CallbackQuery):
+async def convert_files(call: types.CallbackQuery, state: FSMContext):
+    await state.set_state(FileWaiter.waiting_for_file)
     await call.answer()
     await call.message.answer("Let's convert your files. Please send me a PDF, DOC, DOCX file "
                               "and choose the format to convert.")
 
 
 @router.callback_query(F.data == "convert_currency")
-async def callback_query(call: types.CallbackQuery):
+async def callback_query(call: types.CallbackQuery, state: FSMContext):
+    await state.set_state(FileWaiter.waiting_for_sum)
     await call.answer()
     await call.message.answer("Let's convert your currencies. Please enter the sum")
+
+
+@router.message(F.text)
+async def convert_sum(message: types.Message, state: FSMContext):
+    current_state = await state.get_state()
+    if current_state == FileWaiter.waiting_for_sum:
+        amount = message.text.strip()
+        if amount.isnumeric():
+            amount = float(amount)
+            await state.update_data(waiting_for_sum=amount)
+            await message.answer("Now please choose a pair of currencies",
+                                 reply_markup=await keyboards.inline_keyboard(message.chat.id, "currency"))
+            await state.set_state(FileWaiter.convert_to)
+        else:
+            await message.answer("Please enter a valid sum")
+            await state.set_state(FileWaiter.waiting_for_sum)
 
 
 async def download_file(message: types.Message, document_id, file_name):
