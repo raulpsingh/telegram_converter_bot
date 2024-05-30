@@ -1,6 +1,7 @@
 import convertapi
 import config
 import os
+from aiogram import types
 
 convertapi.api_secret = config.CONVERT_TOKEN
 
@@ -28,3 +29,12 @@ class ConvertFilesApi:
                            from_format=from_format).save_files(f'./converted_files/{converted}')
         os.remove(f'./files_to_convert/{file_name}')
         return converted
+
+
+async def download_file(message: types.Message, document_id, file_name):
+    file_name = file_name
+    file_id = document_id
+    bot = message.bot
+    file = await bot.get_file(file_id)
+    file_path = file.file_path
+    await bot.download_file(file_path, f'./files_to_convert/{file_name}')

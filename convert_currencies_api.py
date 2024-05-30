@@ -16,5 +16,5 @@ class ConvertCurrenciesAPI:
 
     def convert_currencies(self):
         currencies = self.currencies.split('/')
-        result = currency_converter.convert(self.amount, currencies[0], currencies[1])
-        return result
+        result = round(currency_converter.convert(self.amount, currencies[0].upper(), currencies[1].upper()), 2)
+        return f"{result} {currencies[1].upper()}"
